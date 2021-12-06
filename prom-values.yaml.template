@@ -1,0 +1,79 @@
+grafana:
+  adminPassword: ${GRAFANA_PASS}
+  ingress:
+    enabled: true
+    hosts:
+      - localhost
+    path: /
+    ingressClassName: nginx
+  additionalDataSources:
+    - name: InfluxDB_InfluxQL
+      type: influxdb
+      url: http://influxdb.influxdb:8086
+      database: fluentbit
+
+prometheus:
+  ingress:
+    enabled: true
+    hosts:
+      - localhost
+    path: /prom
+    ingressClassName: nginx
+  admissionWebhooks:
+    enabled: false
+    patch:
+      enabled: false
+  tlsProxy.enabled: false
+  prometheusSpec:
+    routePrefix: /prom
+    scrapeInterval: "30s"
+
+nodeExporter:
+  enabled: true
+  serviceMonitor:
+    relabelings: 
+      - regex: (.+)
+        sourceLabels:
+          - __meta_kubernetes_endpoint_node_name
+        targetLabel: node
+#      - action: replace
+#        regex: (.*)
+#        replacement: $1
+#        sourceLabels:
+#          - __meta_kubernetes_pod_node_name
+#        targetLabel: kubernetes_node
+
+#node-exporter:
+#  serviceMonitor:
+#    relabelings:
+#      - action: replace
+#        regex: (.*)
+#        replacement: $1
+#        sourceLabels:
+#          - __meta_kubernetes_pod_node_name
+#        targetLabel: kubernetes_node
+
+kubelet:
+  enabled: true
+  serviceMonitor:
+    metricRelabelings:
+      - action: replace
+        sourceLabels:
+          - node
+        targetLabel: instance
+
+#    metricRelabelings:
+#      - action: replace
+#        sourceLabels:
+#          - node
+#        targetLabel: instance
+
+kubeControllerManager:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
